@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-19T13:33:54.181226+00:00",
+  "updatedAt": "2026-10-19T13:36:35.227873+00:00",
   "setting": "single",
   "models": [
     {
@@ -13,8 +13,8 @@
       "model": "vertex/claude-opus-5-5",
       "family": "Claude",
       "name": "Claude Opus 5.5",
-      "status": "evaluating",
-      "detail": "Resuming Rollout · Reusing saved responses"
+      "status": "paused",
+      "detail": "Rollout paused · Provider still rejects access (403)"
     },
     {
       "model": "vertex/claude-opus-5",
