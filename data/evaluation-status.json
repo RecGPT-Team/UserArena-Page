@@ -1,20 +1,20 @@
 {
-  "updatedAt": "2026-10-19T13:16:57.130031+00:00",
+  "updatedAt": "2026-10-19T13:33:54.181226+00:00",
   "setting": "single",
   "models": [
     {
       "model": "gpt-5.6-sol",
       "family": "GPT",
       "name": "GPT 5.6 Sol",
-      "status": "paused",
-      "detail": "Replay complete · Rollout pending"
+      "status": "evaluating",
+      "detail": "Replay complete · Rollout in progress"
     },
     {
       "model": "vertex/claude-opus-5-5",
       "family": "Claude",
       "name": "Claude Opus 5.5",
-      "status": "paused",
-      "detail": "Replay complete · Provider access required"
+      "status": "evaluating",
+      "detail": "Resuming Rollout · Reusing saved responses"
     },
     {
       "model": "vertex/claude-opus-5",
