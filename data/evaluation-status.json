@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-19T19:41:32.222379+00:00",
+  "updatedAt": "2026-10-19T19:46:30.851044+00:00",
   "setting": "single",
   "models": [
     {
@@ -20,36 +20,36 @@
       "model": "vertex/claude-opus-5",
       "family": "Claude",
       "name": "Claude Opus 5",
-      "status": "paused",
-      "detail": "Replay complete · Rollout paused · Connection failure; automatic recovery limit reached"
+      "status": "evaluating",
+      "detail": "Replay complete · Rollout resumed"
     },
     {
       "model": "gemini-3.7-flash",
       "family": "Gemini",
       "name": "Gemini 3.7 Flash",
-      "status": "paused",
-      "detail": "Replay complete · Rollout paused · Connection failure; automatic recovery limit reached"
+      "status": "evaluating",
+      "detail": "Replay complete · Rollout resumed"
     },
     {
       "model": "gemini-3.1-pro-preview",
       "family": "Gemini",
       "name": "Gemini 3.1 Pro Preview",
-      "status": "paused",
-      "detail": "Replay complete · Rollout paused · Connection failure; automatic recovery limit reached"
+      "status": "evaluating",
+      "detail": "Replay complete · Rollout resumed"
     },
     {
       "model": "qwen3.7-plus",
       "family": "Qwen",
       "name": "Qwen 3.7 Plus",
-      "status": "paused",
-      "detail": "Replay paused · Connection failure; automatic recovery limit reached"
+      "status": "evaluating",
+      "detail": "Replay resumed · Rollout pending"
     },
     {
       "model": "qwen3.7-flash",
       "family": "Qwen",
       "name": "Qwen 3.7 Flash",
-      "status": "paused",
-      "detail": "Replay paused · Connection failure; automatic recovery limit reached"
+      "status": "evaluating",
+      "detail": "Replay resumed · Rollout pending"
     }
   ]
 }
