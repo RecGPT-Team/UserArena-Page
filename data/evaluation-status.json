@@ -1,0 +1,55 @@
+{
+  "updatedAt": "2026-10-19T13:16:57.130031+00:00",
+  "setting": "single",
+  "models": [
+    {
+      "model": "gpt-5.6-sol",
+      "family": "GPT",
+      "name": "GPT 5.6 Sol",
+      "status": "paused",
+      "detail": "Replay complete · Rollout pending"
+    },
+    {
+      "model": "vertex/claude-opus-5-5",
+      "family": "Claude",
+      "name": "Claude Opus 5.5",
+      "status": "paused",
+      "detail": "Replay complete · Provider access required"
+    },
+    {
+      "model": "vertex/claude-opus-5",
+      "family": "Claude",
+      "name": "Claude Opus 5",
+      "status": "evaluating",
+      "detail": "Replay complete · Rollout in progress"
+    },
+    {
+      "model": "gemini-3.7-flash",
+      "family": "Gemini",
+      "name": "Gemini 3.7 Flash",
+      "status": "evaluating",
+      "detail": "Replay complete · Rollout in progress"
+    },
+    {
+      "model": "gemini-3.1-pro-preview",
+      "family": "Gemini",
+      "name": "Gemini 3.1 Pro Preview",
+      "status": "evaluating",
+      "detail": "Replay in progress · Rollout pending"
+    },
+    {
+      "model": "qwen3.7-plus",
+      "family": "Qwen",
+      "name": "Qwen 3.7 Plus",
+      "status": "evaluating",
+      "detail": "Replay in progress · Rollout pending"
+    },
+    {
+      "model": "qwen3.7-flash",
+      "family": "Qwen",
+      "name": "Qwen 3.7 Flash",
+      "status": "evaluating",
+      "detail": "Replay in progress · Rollout pending"
+    }
+  ]
+}

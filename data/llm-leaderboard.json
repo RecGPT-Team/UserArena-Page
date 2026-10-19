@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "userarena-llm-track-v1",
+  "status": "results-pending",
+  "updatedAt": null,
+  "protocol": {
+    "name": "Standardized SOTA LLM Track",
+    "promptProfile": "OPTD",
+    "inputPolicy": "All models receive the same OPTD instruction, state serialization, observation history, visual inputs, and executable action candidates for each evaluation setting.",
+    "evaluation": {
+      "replay": [
+        "L0",
+        "L1"
+      ],
+      "rollout": [
+        "L0",
+        "L2",
+        "L3",
+        "L4"
+      ]
+    },
+    "controls": [
+      "Fixed benchmark split and initial states",
+      "Identical 13-action JSON output contract",
+      "Identical environment and action budget",
+      "No model-specific prompt, tools, memory, retrieval, or retry policy",
+      "Uniform failure accounting with no fallback predictions",
+      "Exact provider model identifier, evaluation date, and accepted request parameters reported"
+    ]
+  },
+  "candidateFamilies": [
+    "GPT",
+    "Claude",
+    "Gemini",
+    "Qwen"
+  ],
+  "single": [],
+  "cross": []
+}
