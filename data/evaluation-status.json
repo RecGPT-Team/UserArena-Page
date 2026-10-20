@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-19T19:46:30.851044+00:00",
+  "updatedAt": "2026-10-20T03:20:01.483424+00:00",
   "setting": "single",
   "models": [
     {
@@ -42,14 +42,14 @@
       "family": "Qwen",
       "name": "Qwen 3.7 Plus",
       "status": "evaluating",
-      "detail": "Replay resumed · Rollout pending"
+      "detail": "Replay complete · Rollout in progress"
     },
     {
       "model": "qwen3.7-flash",
       "family": "Qwen",
       "name": "Qwen 3.7 Flash",
-      "status": "evaluating",
-      "detail": "Replay resumed · Rollout pending"
+      "status": "paused",
+      "detail": "Replay complete · Rollout paused · Provider rate limit or quota (429)"
     }
   ]
 }
