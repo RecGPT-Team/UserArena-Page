@@ -60,7 +60,7 @@ function refreshModelFilter(){
 function renderEvaluationStatus(){
  const completed=new Set(currentResults().filter(row=>row.status==='complete').map(row=>row.snapshot));
  const models=(evaluationStatus.models||[]).filter(row=>!completed.has(row.model)&&(state.filter==='all'||row.family===state.filter));
- $('#evaluation-status').innerHTML=models.map(row=>`<article class="model-status"><div><span class="model-family">${esc(row.family)}</span><span class="status-label ${row.status==='paused'?'paused':''}">${row.status==='paused'?'Paused':'Evaluating'}</span></div><h3>${esc(row.name)}</h3><code>${esc(row.model)}</code><p>${esc(row.detail)}</p></article>`).join('');
+ $('#evaluation-status').innerHTML=models.map(row=>`<article class="model-status"><div><span class="model-family">${esc(row.family)}</span><span class="status-label ${row.status==='paused'?'paused':''}">${row.status==='paused'?'Paused':row.status==='complete'?'Completed':'Evaluating'}</span></div><h3>${esc(row.name)}</h3><code>${esc(row.model)}</code><p>${esc(row.detail)}</p></article>`).join('');
  $('#evaluation-status').hidden=!models.length;
  $('#status-updated').textContent=models.length?`Evaluation status as of ${new Date(evaluationStatus.updatedAt).toLocaleString('en-GB',{timeZone:'Europe/Amsterdam',dateStyle:'medium',timeStyle:'short'})} (Amsterdam). Scores appear only after complete Replay and Rollout verification.`:'';
 }
