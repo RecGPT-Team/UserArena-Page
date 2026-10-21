@@ -2,10 +2,6 @@ import { isApprovedReviewUrl } from './review-policy.js';
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
 const esc = value => String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const metrics = {
- rva:['Replay valid-action rate','RVA',1],ova:['Rollout valid-action rate','OVA',1],f1:['Action F1','F1',1],accuracy:['Action accuracy','Acc.',1],dmJsd:['Decision-mix JSD','DM-JSD',-1],te:['Trajectory error','TE',-1],pf:['Population fidelity','PF',1],ctr:['Click-through rate error','ΔCTR',-1],acr:['Add-to-cart rate error','ΔACR',-1],tJsd:['Terminal-state JSD','T-JSD',-1]
-};
-const keys=Object.keys(metrics);
 const levels=[
  ['REPLAY + ROLLOUT','Can the environment execute the action?','Check whether each output can be parsed into an action that is executable in the current state.',[['RVA ↑','Valid-action rate under replay'],['OVA ↑','Valid-action rate under rollout']]],
  ['REPLAY','The same state. The same next decision?','Give the simulator the real state at every step, then compare its next action with the recorded human decision.',[['F1 ↑','Agreement on the action type'],['Accuracy ↑','Action and target agreement']]],
@@ -13,10 +9,9 @@ const levels=[
  ['ROLLOUT','Does individuality survive at scale?','Group users by historical behavior, then compare simulated and real behavior within each group: session dynamics, action patterns, and product preferences.',[['PF ↑','Personalized population fidelity']]],
  ['ROLLOUT','Do the outcomes match real shopping behavior?','Compare aggregate click and add-to-cart rates and the distribution of final session outcomes.',[['ΔCTR / ΔACR ↓','Count-based rate errors'],['T-JSD ↓','Terminal-outcome divergence']]]
 ];
-const state={session:9,step:3,playing:false,timer:null,track:'single',filter:'all',metric:'dmJsd',annotation:'home-lighting'};
-let site,trajectories,results,evaluationStatus,lastTrigger;
+const state={session:9,step:3,playing:false,timer:null,annotation:'home-lighting'};
+let site,trajectories,lastTrigger;
 function toast(text){const el=$('.toast');el.textContent=text;el.hidden=false;clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.hidden=true,3500);}
-function download(name,text,type='application/json'){const url=URL.createObjectURL(new Blob([text],{type}));const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 function openDialog(dialog){lastTrigger=document.activeElement;dialog.showModal();}
 function showImage(src,alt,caption){$('#full-image').src=src;$('#full-image').alt=alt;$('#image-caption').textContent=caption;openDialog($('#image-dialog'));}
 function showInfo(title,content,eyebrow='RESEARCH PREVIEW'){$('#dialog-title').textContent=title;$('#dialog-eyebrow').textContent=eyebrow;$('#dialog-content').innerHTML=content;openDialog($('#info-dialog'));}
@@ -48,46 +43,17 @@ $('#next-frame').addEventListener('click',()=>{stop();const frames=session().ste
 $('#expand-observation').addEventListener('click',()=>{stop();const step=session().steps.find(s=>s.step===state.step);if(step.image)showImage(step.image,$('#explorer-image').alt,`Session ${state.session} · Step ${step.step} · English presentation reconstruction, with rescaled display prices.`);});
 $('#play-keyframes').addEventListener('click',()=>{if(state.playing)return stop();const frames=trajectories.sessions.flatMap(s=>s.steps.filter(t=>t.image).map(t=>({session:s.session,step:t.step})));let index=frames.findIndex(s=>s.session===state.session&&s.step===state.step);state.playing=true;$('#play-keyframes').innerHTML='Pause keyframes <span aria-hidden="true">Ⅱ</span>';$('#play-keyframes').setAttribute('aria-pressed','true');state.timer=setInterval(()=>{index=(index+1)%frames.length;state.session=frames[index].session;state.step=frames[index].step;renderTrajectory();},2400);});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();});
-function currentResults(){return results.single||[];}
-function rowName(row){return row.model;}
-function rowSource(row){const id=(row.snapshot||row.model||'').toLowerCase();return id.includes('claude')?'Claude':id.startsWith('gpt')?'GPT':id.startsWith('gemini')?'Gemini':id.startsWith('qwen')?'Qwen':row.provider;}
-function rankedRows(){return currentResults().filter(r=>r.status==='complete'&&(state.filter==='all'||rowSource(r)===state.filter)&&Number.isFinite(r.metrics?.[state.metric])).toSorted((a,b)=>(b.metrics[state.metric]-a.metrics[state.metric])*metrics[state.metric][2]||rowName(a).localeCompare(rowName(b)));}
-function refreshModelFilter(){
- const values=[...new Set([...currentResults().map(rowSource),...(evaluationStatus.models||[]).map(row=>row.family)])].sort();
- $('#model-filter').innerHTML=`<option value="all">All families</option>${values.map(value=>`<option value="${esc(value)}">${esc(value)}</option>`).join('')}`;
- state.filter='all';
-}
-function renderEvaluationStatus(){
- const completed=new Set(currentResults().filter(row=>row.status==='complete').map(row=>row.snapshot));
- const models=(evaluationStatus.models||[]).filter(row=>!completed.has(row.model)&&(state.filter==='all'||row.family===state.filter));
- $('#evaluation-status').innerHTML=models.map(row=>`<article class="model-status"><div><span class="model-family">${esc(row.family)}</span><span class="status-label ${row.status==='paused'?'paused':''}">${row.status==='paused'?'Paused':row.status==='complete'?'Completed':'Evaluating'}</span></div><h3>${esc(row.name)}</h3><code>${esc(row.model)}</code><p>${esc(row.detail)}</p></article>`).join('');
- $('#evaluation-status').hidden=!models.length;
- $('#status-updated').textContent=models.length?`Evaluation status as of ${new Date(evaluationStatus.updatedAt).toLocaleString('en-GB',{timeZone:'Europe/Amsterdam',dateStyle:'medium',timeStyle:'short'})} (Amsterdam). Scores appear only after complete Replay and Rollout verification.`:'';
-}
-function renderLeaderboard(){
- const rows=rankedRows(),all=currentResults().filter(r=>r.status==='complete'),best=all.length?Object.fromEntries(keys.map(k=>{const values=all.map(r=>r.metrics?.[k]).filter(Number.isFinite);return [k,values.length?Math[metrics[k][2]===1?'max':'min'](...values):null];})):{};
- let previous,rank;
- $('#leaderboard-body').innerHTML=rows.length?rows.map((r,i)=>{if(r.metrics[state.metric]!==previous)rank=i+1;previous=r.metrics[state.metric];const name=rowName(r),source=rowSource(r);return `<tr><td>${String(rank).padStart(2,'0')}</td><td title="${esc(r.snapshot||name)}">${esc(name)}</td><td><span class="modality-tag">${esc(source)}</span></td>${keys.map(k=>`<td class="${r.metrics[k]===best[k]?'best ':''}${k===state.metric?'sorted-metric':''}" title="${esc(metrics[k][0])}${r.metrics[k]===best[k]?' · Best in this setting':''}">${Number.isFinite(r.metrics[k])?r.metrics[k].toFixed(k==='te'?2:4):'N/A'}</td>`).join('')}</tr>`;}).join(''):`<tr class="empty-results"><td colspan="13"><strong>No verified SOTA scores yet.</strong><span>Only complete Replay and Rollout reports are ranked. No scores are estimated.</span></td></tr>`;
- $$('#results-table thead th').forEach((cell,i)=>{if(i>=3){const selected=keys[i-3]===state.metric;cell.classList.toggle('sorted-metric',selected);cell.removeAttribute('aria-sort');if(selected)cell.setAttribute('aria-sort',metrics[state.metric][2]===1?'descending':'ascending');}});
- $('#ranking-note').textContent=rows.length?`${rows.length} models · Ranked by ${metrics[state.metric][1]} (${metrics[state.metric][2]===1?'higher':'lower'} is better)`:`Verified results pending · No models ranked`;
- $('#download-results').disabled=!rows.length;
- renderEvaluationStatus();
-}
-$('#model-filter').addEventListener('change',e=>{state.filter=e.target.value;renderLeaderboard();});
-$('#ranking-metric').addEventListener('change',e=>{state.metric=e.target.value;renderLeaderboard();});
-$('#download-results').addEventListener('click',()=>{const rows=rankedRows();if(!rows.length)return;const csv=[['setting','model','family','snapshot','evaluated_at',...keys].join(','),...rows.map(r=>['single',rowName(r),rowSource(r),r.snapshot||'',r.evaluatedAt||'',...keys.map(k=>r.metrics[k])].join(','))].join('\n');download(`userarena-sota-single-${state.filter}.csv`,csv,'text/csv;charset=utf-8');toast('Downloaded the currently filtered results.');});
 function annotation(){return {src:`assets/annotation/${state.annotation}.png`,alt:state.annotation==='home-lighting'?'English A/B annotation interface for the home and lighting example':'English source-blinded A/B shopping trajectory annotation interface'};}
 $$('[data-annotation]').forEach(b=>b.addEventListener('click',()=>{state.annotation=b.dataset.annotation;$$('[data-annotation]').forEach(a=>a.setAttribute('aria-pressed',String(a===b)));const img=annotation();$('#annotation-image').src=img.src;$('#annotation-image').alt=img.alt;}));
 function openAnnotation(){const img=annotation();showImage(img.src,img.alt,'Source-blinded A/B interface · English presentation copy. This gallery does not collect annotation judgments.');}
 $('#view-annotation').addEventListener('click',openAnnotation);$('#annotation-image-button').addEventListener('click',openAnnotation);
 const resources={code:{key:'codeUrl',title:'Code & evaluation',body:'The public code repository has not been connected yet. The planned release will provide environment tools and the evaluation implementation.',details:['Replay and rollout evaluation','Single-session and cross-session settings','Metrics across L0–L4']},dataset:{key:'datasetUrl',title:'The UserArena dataset',body:'The public dataset link will appear here when the release is available. The benchmark described in the paper contains:',details:['64,729 sessions from 11,010 users','566,102 products and 577,670 actions','Step-aligned context and linked cross-session histories']},environment:{key:'environmentUrl',title:'Enter the environment',body:'The hosted interactive environment is not available in this preview. You can already inspect selected observations and recorded action sequences in the trajectory explorer.',details:['Feed navigation and product exploration','Product details, reviews, and shopping actions','Replay and rollout interfaces for simulator evaluation']}};
 $$('[data-resource]').forEach(b=>b.addEventListener('click',()=>{const r=resources[b.dataset.resource],url=safeUrl(site?.[r.key]);if(url){window.open(url,'_blank','noopener,noreferrer');return;}showInfo(r.title,`<p>${r.body}</p><ul>${r.details.map(x=>`<li>${x}</li>`).join('')}</ul><p class="source-note">Release planned. No external service is connected in this local preview.</p>`);}));
-$('#submission-button').addEventListener('click',()=>{showInfo('One prompt. One environment. Full L0–L4 evaluation.',`<p>The SOTA LLM track isolates model capability by giving every model the same OPTD instruction and setting-specific evaluation inputs.</p><ul><li>Same user profile, current visual and textual observation, product context, bounded interaction history, and executable action candidates.</li><li>Same 13-action JSON contract, benchmark split, initial states, environment, and action budget.</li><li>Replay reports L0–L1; free rollout reports L0 and L2–L4.</li><li>No model-specific prompt, tools, retrieval, memory, retry policy, fallback prediction, or selective sample removal. All runs use the same execution feedback and maximum of three attempts per state.</li><li>Each row records the exact provider model identifier, evaluation date, accepted request parameters, and all failures.</li></ul><p class="source-note">Provider APIs do not always accept identical sampling fields. Unsupported fields are disclosed rather than silently replaced; the prompt and benchmark inputs remain identical.</p>`,'STANDARDIZED LLM TRACK');});
 $('#copy-citation').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('#citation-text').textContent);toast('BibTeX copied. Anonymous manuscript citation.');}catch{showInfo('Copy the citation','<p>Clipboard access is unavailable. Select and copy the citation below.</p><pre class="copy-fallback"></pre>');$('.copy-fallback').textContent=$('#citation-text').textContent;}});
 async function loadJson(url){const r=await fetch(url);if(!r.ok)throw new Error('Could not load '+url);return r.json();}
 try{
- [results,evaluationStatus,site,trajectories]=await Promise.all([loadJson('data/llm-leaderboard.json'),loadJson('data/evaluation-status.json'),loadJson('data/site.json'),loadJson('data/trajectories.json')]);renderTrajectory();refreshModelFilter();renderLeaderboard();
+ [site,trajectories]=await Promise.all([loadJson('data/site.json'),loadJson('data/trajectories.json')]);renderTrajectory();
  if(safeUrl(site.codeUrl))$$('[data-code-link]').forEach(a=>a.href=safeUrl(site.codeUrl));
  $$('[data-resource]').forEach(b=>{if(safeUrl(site[resources[b.dataset.resource].key])){const status=b.querySelector('.resource-status');if(status){status.textContent='Explore release ↗';status.classList.add('available');}if(b.dataset.resource==='environment')b.innerHTML='Launch environment <span aria-hidden="true">↗</span>';}});
  if(safeUrl(site.demoVideoUrl)){const video=document.createElement('video');video.controls=true;video.preload='metadata';video.src=safeUrl(site.demoVideoUrl);video.className='demo-video';video.setAttribute('aria-label','UserArena environment demonstration');$('#explore .environment-callout').after(video);}
-}catch(error){console.error(error);toast('Interactive data could not load. Refresh using the local preview server.');$('#leaderboard-body').innerHTML='<tr><td colspan="13">SOTA results could not load. Please refresh.</td></tr>';$('#timeline').innerHTML='<li>Trajectory data could not load. Please refresh.</li>';$$('#explore button, #leaderboard button, #leaderboard select').forEach(b=>b.disabled=true);}
+}catch(error){console.error(error);toast('Interactive data could not load. Refresh using the local preview server.');$('#timeline').innerHTML='<li>Trajectory data could not load. Please refresh.</li>';$$('#explore button').forEach(b=>b.disabled=true);}
