@@ -1,6 +1,6 @@
 # UserArena
 
-Anonymous project page for **UserArena: Benchmarking Interactive User Simulation for Long-Horizon Shopping Agents**. This repository contains the static benchmark website for double-blind review.
+Project page for **UserArena: Benchmarking Interactive User Simulation for Long-Horizon Shopping Agents**. This repository contains the static benchmark website.
 
 ## GitHub Pages
 
@@ -25,7 +25,7 @@ Then open `http://127.0.0.1:4173/`. An HTTP server is required for loading the J
 - `data/`: public example trajectories, the standardized LLM leaderboard, the paper's leaderboard snapshot, and resource links.
 - `assets/`: presentation screenshots and self-hosted fonts with their licenses.
 
-The anonymous repository card and the hero Code link were removed on 2026-10-23. No external code repository is linked; `data/site.json` keeps `codeUrl` empty. All other resource URLs are also currently empty.
+Repository cards and hero Code links are not displayed. No external code repository is linked; `data/site.json` keeps `codeUrl` empty. All other resource URLs are also currently empty.
 
 Screenshots are anonymized English presentation reconstructions. Product imagery was retouched and displayed prices follow a presentation scaling rule. The annotation image is a partial interface example. The trajectory explorer is a recorded demonstration; hosted environments and community submissions are not yet available.
 
