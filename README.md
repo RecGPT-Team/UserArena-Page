@@ -21,11 +21,11 @@ Then open `http://127.0.0.1:4173/`. An HTTP server is required for loading the J
 ## Content
 
 - `index.html` and `styles.css`: page content and presentation.
-- `js/`: browser interactions and the approved anonymous-link policy.
+- `js/`: browser interactions; double-blind mode blocks external resource URLs.
 - `data/`: public example trajectories, the standardized LLM leaderboard, the paper's leaderboard snapshot, and resource links.
 - `assets/`: presentation screenshots and self-hosted fonts with their licenses.
 
-The Code links point to the anonymous research repository: https://anonymous.4open.science/r/UserArena-D877.
+The anonymous repository card and the hero Code link were removed on 2026-10-23. No external code repository is linked; `data/site.json` keeps `codeUrl` empty. All other resource URLs are also currently empty.
 
 Screenshots are anonymized English presentation reconstructions. Product imagery was retouched and displayed prices follow a presentation scaling rule. The annotation image is a partial interface example. The trajectory explorer is a recorded demonstration; hosted environments and community submissions are not yet available.
 
